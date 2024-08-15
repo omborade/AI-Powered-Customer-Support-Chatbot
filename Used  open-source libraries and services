@@ -1,0 +1,6 @@
+This project uses the following open-source libraries and services:
+
+Dialogflow (formerly known as API.ai)
+Node.js
+Express.js
+Body-parser
