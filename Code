@@ -1,0 +1,65 @@
+// Import necessary libraries
+const express = require('express');
+const bodyParser = require('body-parser');
+const Dialogflow = require('dialogflow');
+
+// Create a new Express app
+const app = express();
+
+// Use body-parser to parse incoming requests
+app.use(bodyParser.json());
+
+// Create a new Dialogflow client
+const dialogflowClient = new Dialogflow.SessionsClient();
+
+// Define intents and responses
+const intents = {
+  'welcome': {
+    response: 'Hello! How can I assist you today?'
+  },
+  'product_info': {
+    response: 'Our product is a cutting-edge solution that can help you with [insert feature]. Would you like to know more?'
+  },
+  'order_status': {
+    response: 'I can help you with that! Can you please provide your order number so I can look it up?'
+  },
+  'return_policy': {
+    response: 'Our return policy is simple: if you're not satisfied, we're not satisfied. You can return your item within [insert timeframe]. Would you like to initiate a return?'
+  },
+  'technical_issue': {
+    response: 'Sorry to hear that you're experiencing an issue. Can you please provide more details so I can assist you better?'
+  }
+};
+
+// Define a function to handle incoming requests
+async function handleRequest(req, res) {
+  // Get the user's message from the request body
+  const message = req.body.message;
+
+  // Use Dialogflow to detect the intent behind the user's message
+  const response = await dialogflowClient.detectIntent({
+    session: 'customer-support',
+    queryInput: {
+      text: {
+        text: message,
+        languageCode: 'en-US'
+      }
+    }
+  });
+
+  // Get the intent and response from the Dialogflow response
+  const intent = response.queryResult.intent.displayName;
+  const responseText = intents[intent].response;
+
+  // Send the response back to the user
+  res.json({ response: responseText });
+}
+
+// Create a route to handle incoming requests
+app.post('/customer-support', handleRequest);
+
+// Start the server
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`);
+});
